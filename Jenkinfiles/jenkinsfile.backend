@@ -1,0 +1,64 @@
+pipeline {
+    agent any
+    stages {
+        stage("Backend-Git-Checkout") {
+            steps {
+                dir("backend"){
+                    echo "Checking out from TabCash backend GitHub repository..."
+                    git branch: 'main', credentialsId: 'GITHUB_PAT', url: 'https://github.com/hackathon-CMP-team/Backend.git'
+                }
+               
+            }
+        }
+        stage("Build") {
+            steps {
+                dir("backend"){
+                    echo "Building the checkout project..."
+                    sh 'docker-compose down'
+                    sh 'docker rmi backend:latest'
+                    sh 'docker build -t backend:latest .'
+                }
+            }
+        }
+        stage("Run") {
+            steps {
+                dir("backend"){
+                    echo "Starting the containers using docker-compose..."
+                    sh 'docker-compose up -d'
+                }
+            }
+        }
+        stage("E2E-Test") {
+            steps {
+                dir("backend"){
+                    echo "Running E2E tests..."
+                }
+            }
+        }
+        stage("QA-Gate") {
+            steps {
+                dir("backend"){
+                    echo "Verifying quality gates..."
+                }
+            }
+        }
+    }
+    post {
+        always {
+            echo "This will always run"
+        }
+        success {
+            echo "This will run only if succeed"
+        }
+        failure {
+            echo "This will run only if failed"
+        }
+        unstable {
+            echo "This will run only if the run was marked as unstable"
+        }
+        changed {
+          echo "This will run only if the state of the pipeline has changed"
+          echo "For example, if the pipeline was previously failed but it is now succeed."
+        }
+    }
+}

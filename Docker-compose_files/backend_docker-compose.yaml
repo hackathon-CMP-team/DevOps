@@ -1,0 +1,10 @@
+version: '3'
+services:
+  backend:
+    image: backend:latest
+    container_name: backend
+    volumes:
+      - ./.env:/app/.env
+    ports:
+      - "3000:3000"
+    restart: always
